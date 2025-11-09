@@ -32,17 +32,24 @@
   - Configuration from .env files
 
 ### Frontend Technologies
-- **React** (^19.2.0)
+- **React** (^19.1.1)
   - UI library for building component-based interfaces
   - Hooks-based state management (useState, useEffect)
 
-- **React DOM** (^19.2.0)
+- **React DOM** (^19.1.1)
   - DOM-specific methods for React
   - Entry point for React components
 
-- **React Scripts** (5.0.1)
-  - Build tools and development server
-  - Create React App configuration
+- **Vite** (^7.1.7)
+  - Next-generation frontend build tool
+  - Fast development server and optimized builds
+  - Module replacement and hot module reload
+
+- **Tailwind CSS** (^4.1.17)
+  - Utility-first CSS framework
+  - Comprehensive design system foundation
+  - Dark mode support and responsive design
+  - Custom component patterns with @tailwindcss/vite
 
 - **Web Vitals** (^2.1.4)
   - Performance monitoring library
@@ -86,7 +93,9 @@ cd frontend
 npm install
 cp .env.example .env
 # Edit .env with API URL (usually http://localhost:5000)
-npm start    # Starts development server
+npm run dev  # Starts Vite development server
+# or
+npm run build   # Builds for production
 ```
 
 #### Environment Configuration
@@ -120,8 +129,9 @@ REACT_APP_API_URL=http://localhost:5000
 - No authentication middleware implemented
 
 ### Frontend Constraints
-- Create React App setup (ejecting not recommended)
+- Vite setup with @tailwindcss/vite plugin
 - React 19 syntax and features
+- Tailwind CSS v4.1.17 utility-first approach
 - No Redux or other state management libraries
 - No TypeScript (currently JavaScript only)
 
@@ -154,11 +164,14 @@ REACT_APP_API_URL=http://localhost:5000
 - **Environment-based Configuration**: Separate configs for dev/prod
 
 ### Frontend Patterns
-- **Component-based Architecture**: Single App.js component
+- **Component-based Architecture**: React 19 with modern hooks
 - **Controlled Forms**: React hooks for form state management
 - **API Integration**: Native fetch with error handling
-- **Responsive Design**: CSS media queries and flexbox
+- **Styling**: Tailwind CSS utility-first approach
+- **Build System**: Vite for fast development and optimized builds
 - **State Management**: React hooks (useState, useEffect)
+- **Dark Mode**: Built-in dark mode support with Tailwind
+- **Responsive Design**: Mobile-first approach with Tailwind classes
 
 ### Development Patterns
 - **Hot Reloading**: Automatic browser refresh on code changes

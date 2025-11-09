@@ -14,10 +14,11 @@ MindSquad follows a modern full-stack architecture with a React frontend, Expres
 
 ### Frontend (React)
 - **Location**: `/frontend/src/`
-- **Main Entry**: `index.js`
-- **Primary Component**: `App.js`
-- **Styling**: CSS with responsive design
-- **Build Tool**: Create React App (react-scripts)
+- **Main Entry**: `main.jsx`
+- **Primary Component**: `App.jsx`
+- **Styling**: Tailwind CSS utility-first approach
+- **Build Tool**: Vite with @tailwindcss/vite plugin
+- **Design System**: Universal Design System Profile with dark mode support
 
 ### Key Components
 - **Database Layer**: Centralized database operations in `/config/database.js`
@@ -43,10 +44,10 @@ backend/
 ### Frontend Structure
 ```
 frontend/src/
-├── App.js                  # Main application component
+├── App.jsx                 # Main application component
 ├── App.css                 # Application styles
-├── index.js                # React entry point
-├── index.css               # Global styles
+├── main.jsx                # React entry point
+├── index.css               # Global styles (Tailwind imports)
 ├── App.test.js             # Unit tests
 ├── reportWebVitals.js      # Performance monitoring
 └── setupTests.js           # Test configuration
@@ -111,9 +112,13 @@ frontend/src/
 
 ### Styling Architecture
 - **CSS Modules**: Component-scoped styles
-- **Responsive Design**: Mobile-first approach
-- **Color Scheme**: Consistent UI theme
-- **Grid Layouts**: Flexible content organization
+- **Tailwind CSS**: Utility-first styling framework
+- **Design System**: Universal Design System Profile
+- **Responsive Design**: Mobile-first approach with Tailwind breakpoints
+- **Color Scheme**: Semantic color system with dark mode support
+- **Grid Layouts**: Flexible content organization with Tailwind Grid
+- **Typography**: System font stack with consistent scale
+- **Component Library**: Reusable patterns and components
 
 ## Development Patterns
 
