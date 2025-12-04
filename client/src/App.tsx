@@ -6,7 +6,13 @@ import Dashboard from './pages/Dashboard';
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
     const { token, loading } = useAuth();
-    if (loading) return <div>Loading...</div>;
+    if (loading) return (
+        <div className="min-h-screen flex items-center justify-center">
+            <div className="bg-lime-300 border-2 border-black rounded-none shadow-[4px_4px_0px_0px_#000] py-4 px-8 font-[family-name:var(--font-mono)] font-bold uppercase text-black">
+                Loading...
+            </div>
+        </div>
+    );
     return token ? children : <Navigate to="/login" />;
 };
 

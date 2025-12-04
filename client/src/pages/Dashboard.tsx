@@ -53,14 +53,14 @@ export default function Dashboard() {
 
     return (
         <div>
-            <header className="border-b-2 border-black p-4 bg-white sticky top-0 z-10">
-                <div className="max-w-screen-xl mx-auto flex justify-between items-center">
-                    <h1 className="text-2xl">MIND<span className="text-gray-400">SQUAD</span></h1>
+            <header className="border-b-2 border-black bg-white sticky top-0 z-10">
+                <div className="max-w-screen-xl mx-auto flex justify-between items-center p-4">
+                    <h1 className="text-2xl font-bold text-black">MIND<span className="text-gray-600">SQUAD</span></h1>
                     <div className="flex items-center gap-4">
-                        <span className="font-[family-name:var(--font-mono)] text-sm uppercase tracking-wider">{user?.username}</span>
+                        <span className="font-[family-name:var(--font-mono)] text-sm uppercase tracking-wider text-gray-600">{user?.username}</span>
                         <button
                             onClick={logout}
-                            className="py-2 px-4 text-xs border-2 border-black bg-white hover:bg-[#ccff00] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[2px_2px_0px_0px_#000] shadow-[4px_4px_0px_0px_#000] font-[family-name:var(--font-mono)] font-bold uppercase transition-all cursor-pointer"
+                            className="py-2 px-4 text-xs border-2 border-black rounded-none bg-white hover:bg-lime-300 hover:shadow-[6px_6px_0px_0px_#000] active:translate-y-[4px] active:shadow-none shadow-[4px_4px_0px_0px_#000] font-[family-name:var(--font-mono)] font-bold uppercase transition-all cursor-pointer"
                         >
                             LOGOUT
                         </button>
@@ -70,9 +70,9 @@ export default function Dashboard() {
 
             <main className="max-w-screen-xl mx-auto p-8">
                 <div className="flex justify-between items-center mb-8">
-                    <h2 className="font-bold uppercase tracking-tight">My Deck <span className="font-[family-name:var(--font-mono)] text-base text-gray-600">[{cards.length}]</span></h2>
+                    <h2 className="font-bold uppercase tracking-tight text-black">My Deck <span className="font-[family-name:var(--font-mono)] text-base text-gray-600">[{cards.length}]</span></h2>
                     <button
-                        className="bg-[#ccff00] py-3 px-6 border-2 border-black hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[2px_2px_0px_0px_#000] shadow-[4px_4px_0px_0px_#000] font-[family-name:var(--font-mono)] font-bold uppercase transition-all cursor-pointer"
+                        className="bg-lime-300 py-3 px-6 border-2 border-black rounded-none hover:shadow-[6px_6px_0px_0px_#000] active:translate-y-[4px] active:shadow-none shadow-[4px_4px_0px_0px_#000] font-[family-name:var(--font-mono)] font-bold uppercase transition-all cursor-pointer"
                         onClick={() => setIsAdding(!isAdding)}
                     >
                         {isAdding ? 'CANCEL' : 'ADD CARD +'}
@@ -80,31 +80,31 @@ export default function Dashboard() {
                 </div>
 
                 {isAdding && (
-                    <div className="border-2 border-dashed border-black shadow-[4px_4px_0px_0px_#000] bg-white p-6 mb-8">
+                    <div className="border-2 border-solid border-black shadow-[4px_4px_0px_0px_#000] bg-white p-6 mb-8">
                         <form onSubmit={handleAddCard} className="grid gap-4">
                             <div>
-                                <label className="block mb-2 font-[family-name:var(--font-mono)] text-sm uppercase tracking-wider">Front Content</label>
+                                <label className="block mb-2 font-[family-name:var(--font-mono)] text-sm uppercase tracking-wider text-gray-600">Front Content</label>
                                 <input
                                     value={newFront}
                                     onChange={e => setNewFront(e.target.value)}
                                     required
                                     placeholder="Question or Term"
-                                    className="w-full p-3 border-2 border-black font-[family-name:var(--font-mono)] text-base outline-none transition-shadow focus:shadow-[4px_4px_0px_0px_#000] focus:bg-gray-50"
+                                    className="w-full p-3 border-2 border-black rounded-none font-[family-name:var(--font-mono)] text-base outline-none focus:ring-2 focus:ring-lime-300 focus:outline-none"
                                 />
                             </div>
                             <div>
-                                <label className="block mb-2 font-[family-name:var(--font-mono)] text-sm uppercase tracking-wider">Back Content</label>
+                                <label className="block mb-2 font-[family-name:var(--font-mono)] text-sm uppercase tracking-wider text-gray-600">Back Content</label>
                                 <input
                                     value={newBack}
                                     onChange={e => setNewBack(e.target.value)}
                                     required
                                     placeholder="Answer or Definition"
-                                    className="w-full p-3 border-2 border-black font-[family-name:var(--font-mono)] text-base outline-none transition-shadow focus:shadow-[4px_4px_0px_0px_#000] focus:bg-gray-50"
+                                    className="w-full p-3 border-2 border-black rounded-none font-[family-name:var(--font-mono)] text-base outline-none focus:ring-2 focus:ring-lime-300 focus:outline-none"
                                 />
                             </div>
                             <button
                                 type="submit"
-                                className="bg-white py-3 px-6 border-2 border-black hover:bg-[#ccff00] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_0px_#000] active:translate-x-0.5 active:translate-y-0.5 active:shadow-[2px_2px_0px_0px_#000] shadow-[4px_4px_0px_0px_#000] font-[family-name:var(--font-mono)] font-bold uppercase transition-all cursor-pointer"
+                                className="bg-white py-3 px-6 border-2 border-black rounded-none hover:bg-lime-300 hover:shadow-[6px_6px_0px_0px_#000] active:translate-y-[4px] active:shadow-none shadow-[4px_4px_0px_0px_#000] font-[family-name:var(--font-mono)] font-bold uppercase transition-all cursor-pointer"
                             >
                                 SAVE TO DECK
                             </button>
@@ -118,7 +118,7 @@ export default function Dashboard() {
                             <Flashcard front={card.front} back={card.back} />
                             <button
                                 onClick={() => handleDelete(card._id)}
-                                className="absolute -top-2.5 -right-2.5 py-1 px-2 bg-black text-white z-[5] text-xs border-2 border-black hover:bg-[#ccff00] hover:text-black transition-colors cursor-pointer font-[family-name:var(--font-mono)] font-bold uppercase shadow-[2px_2px_0px_0px_#000]"
+                                className="absolute -top-2.5 -right-2.5 py-1 px-2 bg-red-400 text-black z-[5] text-xs border-2 border-black rounded-none hover:bg-black hover:text-red-400 transition-colors cursor-pointer font-[family-name:var(--font-mono)] font-bold uppercase shadow-[2px_2px_0px_0px_#000]"
                             >
                                 DEL
                             </button>
