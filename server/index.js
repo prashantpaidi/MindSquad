@@ -5,6 +5,7 @@ const cors = require('cors');
 
 const authRoutes = require('./routes/auth');
 const cardRoutes = require('./routes/cards');
+const deckRoutes = require('./routes/decks');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -21,6 +22,7 @@ mongoose.connect(process.env.MONGO_URI)
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/cards', cardRoutes);
+app.use('/api/decks', deckRoutes);
 
 app.get('/', (req, res) => {
   res.send('MERN Flashcard API is running');
