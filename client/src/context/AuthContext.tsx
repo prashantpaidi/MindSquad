@@ -21,6 +21,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
     const [loading, setLoading] = useState(true);
 
+    const login = React.useCallback((newToken: string, newUser: User) => {
+        localStorage.setItem('token', newToken);
+        localStorage.setItem('user', JSON.stringify(newUser));
+        setToken(newToken);
+        setUser(newUser);
+        axios.defaults.headers.common['x-auth-token'] = newToken;
+    }, []);
+
+    const logout = React.useCallback(() => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setToken(null);
+        setUser(null);
+        delete axios.defaults.headers.common['x-auth-token'];
+    }, []);
+
     useEffect(() => {
         const storedToken = localStorage.getItem('token');
         const storedUser = localStorage.getItem('user');
@@ -33,21 +49,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setLoading(false);
     }, []);
 
-    const login = (newToken: string, newUser: User) => {
-        localStorage.setItem('token', newToken);
-        localStorage.setItem('user', JSON.stringify(newUser));
-        setToken(newToken);
-        setUser(newUser);
-        axios.defaults.headers.common['x-auth-token'] = newToken;
-    };
+    useEffect(() => {
+        const interceptor = axios.interceptors.response.use(
+            response => response,
+            error => {
+                if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+                    logout();
+                }
+                return Promise.reject(error);
+            }
+        );
 
-    const logout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        setToken(null);
-        setUser(null);
-        delete axios.defaults.headers.common['x-auth-token'];
-    };
+        return () => {
+            axios.interceptors.response.eject(interceptor);
+        };
+    }, [logout]);
 
     return (
         <AuthContext.Provider value={{ user, token, login, logout, loading }}>

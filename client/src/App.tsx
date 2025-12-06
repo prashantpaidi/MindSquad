@@ -3,6 +3,7 @@ import { useAuth } from './context/AuthContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import StudyMode from './pages/StudyMode';
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
     const { token, loading } = useAuth();
@@ -28,6 +29,14 @@ function App() {
                         element={
                             <PrivateRoute>
                                 <Dashboard />
+                            </PrivateRoute>
+                        }
+                    />
+                    <Route
+                        path="/study/:deckId"
+                        element={
+                            <PrivateRoute>
+                                <StudyMode />
                             </PrivateRoute>
                         }
                     />
