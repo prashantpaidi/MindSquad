@@ -42,9 +42,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const storedUser = localStorage.getItem('user');
 
         if (storedToken && storedUser) {
-            setToken(storedToken);
-            setUser(JSON.parse(storedUser));
-            axios.defaults.headers.common['x-auth-token'] = storedToken;
+            try {
+                const parsedUser = JSON.parse(storedUser);
+                setToken(storedToken);
+                setUser(parsedUser);
+                axios.defaults.headers.common['x-auth-token'] = storedToken;
+            } catch (error) {
+                console.error("Failed to parse stored user", error);
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                setToken(null);
+                setUser(null);
+            }
         }
         setLoading(false);
     }, []);

@@ -14,6 +14,22 @@ const DeckSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
+    },
+    isPublic: {
+        type: Boolean,
+        default: false
+    },
+    likes: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }],
+    forks: {
+        type: Number,
+        default: 0
+    },
+    origin: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Deck'
     }
 }, { timestamps: true });
 

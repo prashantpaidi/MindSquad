@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import DeckSelector from '../components/DeckSelector';
 import CreateDeckModal from '../components/CreateDeckModal';
+import ConfirmationModal from '../components/ConfirmationModal';
 import { Deck } from '../types';
 
 export default function Dashboard() {
@@ -11,6 +12,9 @@ export default function Dashboard() {
     const navigate = useNavigate();
     const [decks, setDecks] = useState<Deck[]>([]);
     const [isCreateDeckModalOpen, setIsCreateDeckModalOpen] = useState(false);
+    const [sharingDeck, setSharingDeck] = useState<Deck | null>(null);
+
+    const [editingDeckData, setEditingDeckData] = useState<{ _id: string; name: string; description: string; cards: any[] } | null>(null);
 
     useEffect(() => {
         fetchDecks();
@@ -25,33 +29,73 @@ export default function Dashboard() {
         }
     };
 
-    const handleCreateDeck = async (name: string, description: string, cards: { front: string; back: string }[]) => {
+    const handleCreateDeck = async (name: string, description: string, cards: { _id?: string; front: string; back: string }[]) => {
         try {
-            // 1. Create Deck
-            const deckRes = await axios.post('/api/decks', { name, description });
-            const newDeck = deckRes.data;
+            if (editingDeckData) {
+                // UPDATE EXISTING DECK
+                const deckId = editingDeckData._id;
 
-            // 2. Create Cards (if any)
-            if (cards.length > 0) {
-                await Promise.all(cards.map(card =>
-                    axios.post('/api/cards', {
-                        front: card.front,
-                        back: card.back,
-                        deckId: newDeck._id
-                    })
-                ));
+                // 1. Update Deck Details
+                await axios.put(`/api/decks/${deckId}`, { name, description });
 
-                // Update counts locally since we added cards
-                // New cards are due immediately by default
-                newDeck.cardCount = cards.length;
-                newDeck.dueCount = cards.length;
+                // 2. Handle Cards
+                const originalCards = editingDeckData.cards;
+                const submittedCardIds = new Set(cards.filter(c => c._id).map(c => c._id));
+
+                // Identify cards to delete (present in original but not in submitted)
+                const cardsToDelete = originalCards.filter(c => !submittedCardIds.has(c._id));
+                await Promise.all(cardsToDelete.map(c => axios.delete(`/api/cards/${c._id}`)));
+
+                // Identify cards to update or create
+                await Promise.all(cards.map(card => {
+                    if (card._id) {
+                        // Update existing card
+                        return axios.put(`/api/cards/${card._id}`, {
+                            front: card.front,
+                            back: card.back
+                        });
+                    } else {
+                        // Create new card
+                        return axios.post('/api/cards', {
+                            front: card.front,
+                            back: card.back,
+                            deckId: deckId
+                        });
+                    }
+                }));
+
+                // Update local state
+                fetchDecks();
+
+                setEditingDeckData(null);
+            } else {
+                // CREATE NEW DECK
+                // 1. Create Deck
+                const deckRes = await axios.post('/api/decks', { name, description });
+                const newDeck = deckRes.data;
+
+                // 2. Create Cards (if any)
+                if (cards.length > 0) {
+                    await Promise.all(cards.map(card =>
+                        axios.post('/api/cards', {
+                            front: card.front,
+                            back: card.back,
+                            deckId: newDeck._id
+                        })
+                    ));
+
+                    // Update counts locally since we added cards
+                    newDeck.cardCount = cards.length;
+                    newDeck.dueCount = cards.length;
+                }
+
+                setDecks([...decks, newDeck]);
             }
 
-            setDecks([...decks, newDeck]);
             setIsCreateDeckModalOpen(false);
         } catch (err) {
             console.error(err);
-            alert('Failed to create deck. Please try again.');
+            alert('Failed to save deck. Please try again.');
         }
     };
 
@@ -64,15 +108,57 @@ export default function Dashboard() {
         }
     };
 
+    const handleEditDeck = async (deck: Deck) => {
+        try {
+            // Fetch cards for this deck
+            const res = await axios.get(`/api/cards/${deck._id}`);
+            const cards = res.data;
+
+            setEditingDeckData({
+                _id: deck._id,
+                name: deck.name,
+                description: deck.description,
+                cards: cards
+            });
+            setIsCreateDeckModalOpen(true);
+        } catch (err) {
+            console.error(err);
+            alert('Failed to load deck details.');
+        }
+    };
+
     const handleStudyDeck = (deckId: string) => {
         navigate(`/study/${deckId}`);
+    };
+
+    const handleCloseModal = () => {
+        setIsCreateDeckModalOpen(false);
+        setEditingDeckData(null);
+    };
+
+    const handleShareDeckClick = (deck: Deck) => {
+        setSharingDeck(deck);
+    };
+
+    const confirmShareDeck = async () => {
+        if (!sharingDeck) return;
+
+        try {
+            const res = await axios.put(`/api/decks/${sharingDeck._id}/share`);
+            // Update local state
+            setDecks(decks.map(d => d._id === sharingDeck._id ? { ...d, isPublic: res.data.isPublic } : d));
+            setSharingDeck(null);
+        } catch (err) {
+            console.error(err);
+            alert('Failed to update share status.');
+        }
     };
 
     return (
         <div>
             <header className="border-b-2 border-black bg-white sticky top-0 z-10">
                 <div className="max-w-screen-xl mx-auto flex justify-between items-center p-4">
-                    <h1 className="text-2xl font-bold text-black">
+                    <h1 className="text-2xl font-bold text-black cursor-pointer" onClick={() => navigate('/')}>
                         MIND<span className="text-gray-600">SQUAD</span>
                     </h1>
                     <div className="flex items-center gap-4">
@@ -93,15 +179,33 @@ export default function Dashboard() {
                 <DeckSelector
                     decks={decks}
                     onSelectDeck={handleStudyDeck}
-                    onCreateDeck={() => setIsCreateDeckModalOpen(true)}
+                    onCreateDeck={() => {
+                        setEditingDeckData(null);
+                        setIsCreateDeckModalOpen(true);
+                    }}
                     onDeleteDeck={handleDeleteDeck}
+                    onEditDeck={handleEditDeck}
+                    onShareDeck={handleShareDeckClick}
                 />
             </main>
 
             <CreateDeckModal
                 isOpen={isCreateDeckModalOpen}
-                onClose={() => setIsCreateDeckModalOpen(false)}
+                onClose={handleCloseModal}
                 onSubmit={handleCreateDeck}
+                initialData={editingDeckData || undefined}
+            />
+
+            <ConfirmationModal
+                isOpen={!!sharingDeck}
+                onClose={() => setSharingDeck(null)}
+                onConfirm={confirmShareDeck}
+                title={sharingDeck?.isPublic ? "Unshare Deck" : "Share Deck"}
+                message={sharingDeck?.isPublic
+                    ? `Are you sure you want to unshare "${sharingDeck?.name}"? It will no longer be visible to the community.`
+                    : `Are you sure you want to share "${sharingDeck?.name}" with the community? Others will be able to see and fork it.`}
+                confirmText={sharingDeck?.isPublic ? "Unshare" : "Share"}
+                variant={sharingDeck?.isPublic ? "danger" : "info"}
             />
         </div>
     );

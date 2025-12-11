@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import StudyMode from './pages/StudyMode';
+import Community from './pages/Community';
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
     const { token, loading } = useAuth();
@@ -19,7 +20,7 @@ const PrivateRoute = ({ children }: { children: JSX.Element }) => {
 
 function App() {
     return (
-        <Router>
+        <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
             <div className="app">
                 <Routes>
                     <Route path="/login" element={<Login />} />
@@ -37,6 +38,14 @@ function App() {
                         element={
                             <PrivateRoute>
                                 <StudyMode />
+                            </PrivateRoute>
+                        }
+                    />
+                    <Route
+                        path="/community"
+                        element={
+                            <PrivateRoute>
+                                <Community />
                             </PrivateRoute>
                         }
                     />

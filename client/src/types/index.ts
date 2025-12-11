@@ -2,9 +2,14 @@ export interface Deck {
     _id: string;
     name: string;
     description: string;
-    userId: string;
+    userId: string | { _id: string; username: string };
     cardCount: number;
     dueCount: number;
+    isPublic: boolean;
+    likes: string[];
+    forks: number;
+    origin?: string;
+    likesCount?: number;
     createdAt: string;
     updatedAt: string;
 }

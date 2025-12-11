@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
+import { Trash2 } from 'lucide-react';
 
 interface CardInput {
+    _id?: string;
     front: string;
     back: string;
 }
@@ -9,9 +11,14 @@ interface CreateDeckModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSubmit: (name: string, description: string, cards: CardInput[]) => void;
+    initialData?: {
+        name: string;
+        description: string;
+        cards: CardInput[];
+    };
 }
 
-export default function CreateDeckModal({ isOpen, onClose, onSubmit }: CreateDeckModalProps) {
+export default function CreateDeckModal({ isOpen, onClose, onSubmit, initialData }: CreateDeckModalProps) {
     const [mode, setMode] = useState<'SELECT' | 'MANUAL' | 'AI'>('SELECT');
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
@@ -19,12 +26,19 @@ export default function CreateDeckModal({ isOpen, onClose, onSubmit }: CreateDec
 
     useEffect(() => {
         if (isOpen) {
-            setMode('SELECT');
-            setName('');
-            setDescription('');
-            setCards([{ front: '', back: '' }]);
+            if (initialData) {
+                setMode('MANUAL');
+                setName(initialData.name);
+                setDescription(initialData.description);
+                setCards(initialData.cards.length > 0 ? initialData.cards : [{ front: '', back: '' }]);
+            } else {
+                setMode('SELECT');
+                setName('');
+                setDescription('');
+                setCards([{ front: '', back: '' }]);
+            }
         }
-    }, [isOpen]);
+    }, [isOpen, initialData]);
 
     if (!isOpen) return null;
 
@@ -146,13 +160,13 @@ export default function CreateDeckModal({ isOpen, onClose, onSubmit }: CreateDec
                 {/* Header */}
                 <div className="flex justify-between items-center p-6 border-b-2 border-black bg-gray-50">
                     <button
-                        onClick={() => setMode('SELECT')}
+                        onClick={() => initialData ? onClose() : setMode('SELECT')}
                         className="text-sm font-bold uppercase hover:text-gray-600 flex items-center gap-2"
                     >
                         &lt; Cancel
                     </button>
                     <h2 className="text-xl font-bold uppercase tracking-wider">
-                        New Deck Creation
+                        {initialData ? 'Edit Deck' : 'New Deck Creation'}
                     </h2>
                     <button
                         onClick={handleSubmit}
@@ -222,7 +236,7 @@ export default function CreateDeckModal({ isOpen, onClose, onSubmit }: CreateDec
                                     className="absolute bottom-4 right-4 text-red-500 hover:text-red-700 font-bold text-sm uppercase flex items-center gap-1"
                                     title="Delete Card"
                                 >
-                                    <span>🗑️</span> Del
+                                    <Trash2 size={14} /> Del
                                 </button>
                             </div>
                         ))}
