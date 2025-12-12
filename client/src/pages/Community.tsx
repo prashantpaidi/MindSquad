@@ -17,7 +17,7 @@ export default function Community() {
 
     const fetchCommunityDecks = async () => {
         try {
-            const res = await axios.get('/api/decks/community');
+            const res = await axios.get(`${import.meta.env.VITE_APP_API_URL}/api/decks/community`);
             setDecks(res.data);
             setLoading(false);
         } catch (err) {
@@ -28,7 +28,7 @@ export default function Community() {
 
     const handleLikeDeck = async (deck: Deck) => {
         try {
-            const res = await axios.post(`/api/decks/${deck._id}/like`);
+            const res = await axios.post(`${import.meta.env.VITE_APP_API_URL}/api/decks/${deck._id}/like`);
             // Update local state
             setDecks(decks.map(d => {
                 if (d._id === deck._id) {
@@ -58,7 +58,7 @@ export default function Community() {
 
     const handleForkDeck = async (deck: Deck) => {
         try {
-            await axios.post(`/api/decks/${deck._id}/fork`);
+            await axios.post(`${import.meta.env.VITE_APP_API_URL}/api/decks/${deck._id}/fork`);
             alert('Deck forked successfully! Check your dashboard.');
             // Optionally redirect to dashboard or just show success
             navigate('/');

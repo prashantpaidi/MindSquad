@@ -25,7 +25,7 @@ export default function StudyMode() {
             if (deck) setDeckName(deck.name);
 
             // Get due cards
-            const res = await axios.get(`/api/cards/due/${deckId}`);
+            const res = await axios.get(`${import.meta.env.VITE_APP_API_URL}/api/cards/due/${deckId}`);
             setCards(res.data);
             setLoading(false);
         } catch (err) {
@@ -38,7 +38,7 @@ export default function StudyMode() {
         if (currentIndex >= cards.length) return;
 
         try {
-            await axios.post(`/api/cards/${cards[currentIndex]._id}/review`, { response });
+            await axios.post(`${import.meta.env.VITE_APP_API_URL}/api/cards/${cards[currentIndex]._id}/review`, { response });
 
             // Move to next card
             if (currentIndex < cards.length - 1) {

@@ -23,6 +23,7 @@ mongoose.connect(process.env.MONGO_URI)
 app.use('/api/auth', authRoutes);
 app.use('/api/cards', cardRoutes);
 app.use('/api/decks', deckRoutes);
+app.use('/api/ai', require('./routes/ai'));
 
 app.get('/', (req, res) => {
   res.send('MERN Flashcard API is running');
