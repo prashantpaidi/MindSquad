@@ -36,7 +36,7 @@ export default function Dashboard() {
                 const deckId = editingDeckData._id;
 
                 // 1. Update Deck Details
-                await axios.put(`${import.meta.env.VITE_APP_API_URL}/api/decks/${deckId}`, { name, description });
+                await axios.put(`/api/decks/${deckId}`, { name, description });
 
                 // 2. Handle Cards
                 const originalCards = editingDeckData.cards;
@@ -44,13 +44,13 @@ export default function Dashboard() {
 
                 // Identify cards to delete (present in original but not in submitted)
                 const cardsToDelete = originalCards.filter(c => !submittedCardIds.has(c._id));
-                await Promise.all(cardsToDelete.map(c => axios.delete(`${import.meta.env.VITE_APP_API_URL}/api/cards/${c._id}`)));
+                await Promise.all(cardsToDelete.map(c => axios.delete(`/api/cards/${c._id}`)));
 
                 // Identify cards to update or create
                 await Promise.all(cards.map(card => {
                     if (card._id) {
                         // Update existing card
-                        return axios.put(`${import.meta.env.VITE_APP_API_URL}/api/cards/${card._id}`, {
+                        return axios.put(`/api/cards/${card._id}`, {
                             front: card.front,
                             back: card.back
                         });
@@ -101,7 +101,7 @@ export default function Dashboard() {
 
     const handleDeleteDeck = async (deckId: string) => {
         try {
-            await axios.delete(`${import.meta.env.VITE_APP_API_URL}/api/decks/${deckId}`);
+            await axios.delete(`/api/decks/${deckId}`);
             setDecks(decks.filter(d => d._id !== deckId));
         } catch (err) {
             console.error(err);
@@ -111,7 +111,7 @@ export default function Dashboard() {
     const handleEditDeck = async (deck: Deck) => {
         try {
             // Fetch cards for this deck
-            const res = await axios.get(`${import.meta.env.VITE_APP_API_URL}/api/cards/${deck._id}`);
+            const res = await axios.get(`/api/cards/${deck._id}`);
             const cards = res.data;
 
             setEditingDeckData({
@@ -144,7 +144,7 @@ export default function Dashboard() {
         if (!sharingDeck) return;
 
         try {
-            const res = await axios.put(`${import.meta.env.VITE_APP_API_URL}/api/decks/${sharingDeck._id}/share`);
+            const res = await axios.put(`/api/decks/${sharingDeck._id}/share`);
             // Update local state
             setDecks(decks.map(d => d._id === sharingDeck._id ? { ...d, isPublic: res.data.isPublic } : d));
             setSharingDeck(null);
