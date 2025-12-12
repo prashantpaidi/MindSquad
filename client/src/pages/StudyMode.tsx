@@ -20,7 +20,7 @@ export default function StudyMode() {
         try {
             setLoading(true);
             // Get deck name
-            const decksRes = await axios.get('/api/decks');
+            const decksRes = await axios.get(`${import.meta.env.VITE_APP_API_URL}/api/decks`);
             const deck = decksRes.data.find((d: any) => d._id === deckId);
             if (deck) setDeckName(deck.name);
 

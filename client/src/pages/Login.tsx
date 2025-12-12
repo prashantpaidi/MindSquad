@@ -14,7 +14,7 @@ export default function Login() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const res = await axios.post('/api/auth/login', { username, password });
+            const res = await axios.post(`${import.meta.env.VITE_APP_API_URL}/api/auth/login`, { username, password });
             login(res.data.token, { userId: res.data.userId, username: res.data.username });
             navigate('/');
         } catch (err: any) {

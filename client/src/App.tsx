@@ -6,48 +6,36 @@ import Dashboard from './pages/Dashboard';
 import StudyMode from './pages/StudyMode';
 import Community from './pages/Community';
 
-const PrivateRoute = ({ children }: { children: JSX.Element }) => {
-    const { token, loading } = useAuth();
-    if (loading) return (
-        <div className="min-h-screen flex items-center justify-center">
-            <div className="bg-lime-300 border-2 border-black rounded-none shadow-[4px_4px_0px_0px_#000] py-4 px-8 font-[family-name:var(--font-mono)] font-bold uppercase text-black">
-                Loading...
-            </div>
-        </div>
-    );
-    return token ? children : <Navigate to="/login" />;
-};
-
 function App() {
+    const { token, loading } = useAuth();
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="bg-lime-300 border-2 border-black rounded-none shadow-[4px_4px_0px_0px_#000] py-4 px-8 font-[family-name:var(--font-mono)] font-bold uppercase text-black">
+                    Loading...
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <Router>
             <div className="app">
                 <Routes>
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
                     <Route
                         path="/"
-                        element={
-                            <PrivateRoute>
-                                <Dashboard />
-                            </PrivateRoute>
-                        }
+                        element={token ? <Dashboard /> : <Navigate to="/login" />}
                     />
                     <Route
                         path="/study/:deckId"
-                        element={
-                            <PrivateRoute>
-                                <StudyMode />
-                            </PrivateRoute>
-                        }
+                        element={token ? <StudyMode /> : <Navigate to="/login" />}
                     />
                     <Route
                         path="/community"
-                        element={
-                            <PrivateRoute>
-                                <Community />
-                            </PrivateRoute>
-                        }
+                        element={token ? <Community /> : <Navigate to="/login" />}
                     />
                 </Routes>
             </div>

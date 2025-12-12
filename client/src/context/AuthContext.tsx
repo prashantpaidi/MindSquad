@@ -21,21 +21,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
     const [loading, setLoading] = useState(true);
 
-    const login = React.useCallback((newToken: string, newUser: User) => {
+    const login = (newToken: string, newUser: User) => {
         localStorage.setItem('token', newToken);
         localStorage.setItem('user', JSON.stringify(newUser));
         setToken(newToken);
         setUser(newUser);
         axios.defaults.headers.common['x-auth-token'] = newToken;
-    }, []);
+    };
 
-    const logout = React.useCallback(() => {
+    const logout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         setToken(null);
         setUser(null);
         delete axios.defaults.headers.common['x-auth-token'];
-    }, []);
+    };
 
     useEffect(() => {
         const storedToken = localStorage.getItem('token');

@@ -22,7 +22,7 @@ export default function Dashboard() {
 
     const fetchDecks = async () => {
         try {
-            const res = await axios.get('/api/decks');
+            const res = await axios.get(`${import.meta.env.VITE_APP_API_URL}/api/decks`);
             setDecks(res.data);
         } catch (err) {
             console.error(err);
@@ -36,7 +36,7 @@ export default function Dashboard() {
                 const deckId = editingDeckData._id;
 
                 // 1. Update Deck Details
-                await axios.put(`/api/decks/${deckId}`, { name, description });
+                await axios.put(`${import.meta.env.VITE_APP_API_URL}/api/decks/${deckId}`, { name, description });
 
                 // 2. Handle Cards
                 const originalCards = editingDeckData.cards;
@@ -44,19 +44,19 @@ export default function Dashboard() {
 
                 // Identify cards to delete (present in original but not in submitted)
                 const cardsToDelete = originalCards.filter(c => !submittedCardIds.has(c._id));
-                await Promise.all(cardsToDelete.map(c => axios.delete(`/api/cards/${c._id}`)));
+                await Promise.all(cardsToDelete.map(c => axios.delete(`${import.meta.env.VITE_APP_API_URL}/api/cards/${c._id}`)));
 
                 // Identify cards to update or create
                 await Promise.all(cards.map(card => {
                     if (card._id) {
                         // Update existing card
-                        return axios.put(`/api/cards/${card._id}`, {
+                        return axios.put(`${import.meta.env.VITE_APP_API_URL}/api/cards/${card._id}`, {
                             front: card.front,
                             back: card.back
                         });
                     } else {
                         // Create new card
-                        return axios.post('/api/cards', {
+                        return axios.post(`${import.meta.env.VITE_APP_API_URL}/api/cards`, {
                             front: card.front,
                             back: card.back,
                             deckId: deckId
@@ -71,13 +71,13 @@ export default function Dashboard() {
             } else {
                 // CREATE NEW DECK
                 // 1. Create Deck
-                const deckRes = await axios.post('/api/decks', { name, description });
+                const deckRes = await axios.post(`${import.meta.env.VITE_APP_API_URL}/api/decks`, { name, description });
                 const newDeck = deckRes.data;
 
                 // 2. Create Cards (if any)
                 if (cards.length > 0) {
                     await Promise.all(cards.map(card =>
-                        axios.post('/api/cards', {
+                        axios.post(`${import.meta.env.VITE_APP_API_URL}/api/cards`, {
                             front: card.front,
                             back: card.back,
                             deckId: newDeck._id
@@ -101,7 +101,7 @@ export default function Dashboard() {
 
     const handleDeleteDeck = async (deckId: string) => {
         try {
-            await axios.delete(`/api/decks/${deckId}`);
+            await axios.delete(`${import.meta.env.VITE_APP_API_URL}/api/decks/${deckId}`);
             setDecks(decks.filter(d => d._id !== deckId));
         } catch (err) {
             console.error(err);
@@ -111,7 +111,7 @@ export default function Dashboard() {
     const handleEditDeck = async (deck: Deck) => {
         try {
             // Fetch cards for this deck
-            const res = await axios.get(`/api/cards/${deck._id}`);
+            const res = await axios.get(`${import.meta.env.VITE_APP_API_URL}/api/cards/${deck._id}`);
             const cards = res.data;
 
             setEditingDeckData({
@@ -144,7 +144,7 @@ export default function Dashboard() {
         if (!sharingDeck) return;
 
         try {
-            const res = await axios.put(`/api/decks/${sharingDeck._id}/share`);
+            const res = await axios.put(`${import.meta.env.VITE_APP_API_URL}/api/decks/${sharingDeck._id}/share`);
             // Update local state
             setDecks(decks.map(d => d._id === sharingDeck._id ? { ...d, isPublic: res.data.isPublic } : d));
             setSharingDeck(null);
@@ -162,15 +162,34 @@ export default function Dashboard() {
                         MIND<span className="text-gray-600">SQUAD</span>
                     </h1>
                     <div className="flex items-center gap-4">
-                        <span className="font-[family-name:var(--font-mono)] text-sm uppercase tracking-wider text-gray-600">
-                            {user?.username}
-                        </span>
-                        <button
-                            onClick={logout}
-                            className="py-2 px-4 text-xs border-2 border-black rounded-none bg-white hover:bg-lime-300 hover:shadow-[6px_6px_0px_0px_#000] active:translate-y-[4px] active:shadow-none shadow-[4px_4px_0px_0px_#000] font-[family-name:var(--font-mono)] font-bold uppercase transition-all cursor-pointer"
-                        >
-                            LOGOUT
-                        </button>
+                        {user ? (
+                            <>
+                                <span className="font-[family-name:var(--font-mono)] text-sm uppercase tracking-wider text-gray-600">
+                                    {user.username}
+                                </span>
+                                <button
+                                    onClick={logout}
+                                    className="py-2 px-4 text-xs border-2 border-black rounded-none bg-white hover:bg-lime-300 hover:shadow-[6px_6px_0px_0px_#000] active:translate-y-[4px] active:shadow-none shadow-[4px_4px_0px_0px_#000] font-[family-name:var(--font-mono)] font-bold uppercase transition-all cursor-pointer"
+                                >
+                                    LOGOUT
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <button
+                                    onClick={() => navigate('/login')}
+                                    className="py-2 px-4 text-xs border-2 border-black rounded-none bg-white hover:bg-lime-300 hover:shadow-[6px_6px_0px_0px_#000] active:translate-y-[4px] active:shadow-none shadow-[4px_4px_0px_0px_#000] font-[family-name:var(--font-mono)] font-bold uppercase transition-all cursor-pointer"
+                                >
+                                    LOGIN
+                                </button>
+                                <button
+                                    onClick={() => navigate('/register')}
+                                    className="py-2 px-4 text-xs border-2 border-black rounded-none bg-lime-300 hover:shadow-[6px_6px_0px_0px_#000] active:translate-y-[4px] active:shadow-none shadow-[4px_4px_0px_0px_#000] font-[family-name:var(--font-mono)] font-bold uppercase transition-all cursor-pointer"
+                                >
+                                    SIGN UP
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
             </header>

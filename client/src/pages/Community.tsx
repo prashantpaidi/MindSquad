@@ -76,15 +76,34 @@ export default function Community() {
                         MIND<span className="text-gray-600">SQUAD</span>
                     </h1>
                     <div className="flex items-center gap-4">
-                        <span className="font-[family-name:var(--font-mono)] text-sm uppercase tracking-wider text-gray-600">
-                            {user?.username}
-                        </span>
-                        <button
-                            onClick={logout}
-                            className="py-2 px-4 text-xs border-2 border-black rounded-none bg-white hover:bg-lime-300 hover:shadow-[6px_6px_0px_0px_#000] active:translate-y-[4px] active:shadow-none shadow-[4px_4px_0px_0px_#000] font-[family-name:var(--font-mono)] font-bold uppercase transition-all cursor-pointer"
-                        >
-                            LOGOUT
-                        </button>
+                        {user ? (
+                            <>
+                                <span className="font-[family-name:var(--font-mono)] text-sm uppercase tracking-wider text-gray-600">
+                                    {user.username}
+                                </span>
+                                <button
+                                    onClick={logout}
+                                    className="py-2 px-4 text-xs border-2 border-black rounded-none bg-white hover:bg-lime-300 hover:shadow-[6px_6px_0px_0px_#000] active:translate-y-[4px] active:shadow-none shadow-[4px_4px_0px_0px_#000] font-[family-name:var(--font-mono)] font-bold uppercase transition-all cursor-pointer"
+                                >
+                                    LOGOUT
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <button
+                                    onClick={() => navigate('/login')}
+                                    className="py-2 px-4 text-xs border-2 border-black rounded-none bg-white hover:bg-lime-300 hover:shadow-[6px_6px_0px_0px_#000] active:translate-y-[4px] active:shadow-none shadow-[4px_4px_0px_0px_#000] font-[family-name:var(--font-mono)] font-bold uppercase transition-all cursor-pointer"
+                                >
+                                    LOGIN
+                                </button>
+                                <button
+                                    onClick={() => navigate('/register')}
+                                    className="py-2 px-4 text-xs border-2 border-black rounded-none bg-lime-300 hover:shadow-[6px_6px_0px_0px_#000] active:translate-y-[4px] active:shadow-none shadow-[4px_4px_0px_0px_#000] font-[family-name:var(--font-mono)] font-bold uppercase transition-all cursor-pointer"
+                                >
+                                    SIGN UP
+                                </button>
+                            </>
+                        )}
                     </div>
                 </div>
             </header>
