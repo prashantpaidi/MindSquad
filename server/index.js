@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const errorHandler = require('./middleware/error');
 
 const authRoutes = require('./routes/auth');
 const cardRoutes = require('./routes/cards');
@@ -24,6 +25,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/cards', cardRoutes);
 app.use('/api/decks', deckRoutes);
 app.use('/api/ai', require('./routes/ai'));
+
+// Error Handler
+app.use(errorHandler);
 
 app.get('/', (req, res) => {
   res.send('MERN Flashcard API is running');
