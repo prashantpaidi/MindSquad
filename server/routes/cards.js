@@ -39,6 +39,29 @@ router.post('/', auth, async (req, res, next) => {
     }
 });
 
+// Create multiple cards (Bulk)
+router.post('/bulk', auth, async (req, res, next) => {
+    try {
+        const { cards, deckId } = req.body;
+
+        if (!cards || !Array.isArray(cards) || cards.length === 0 || !deckId) {
+            return res.status(400).json({ message: 'Please provide an array of cards and deckId' });
+        }
+
+        const cardsToInsert = cards.map(card => ({
+            front: card.front,
+            back: card.back,
+            deckId,
+            userId: req.user.id
+        }));
+
+        const savedCards = await Card.insertMany(cardsToInsert);
+        res.json(savedCards);
+    } catch (err) {
+        next(err);
+    }
+});
+
 // Update a card
 router.put('/:id', auth, async (req, res, next) => {
     try {

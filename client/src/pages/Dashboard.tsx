@@ -76,13 +76,10 @@ export default function Dashboard() {
 
                 // 2. Create Cards (if any)
                 if (cards.length > 0) {
-                    await Promise.all(cards.map(card =>
-                        axios.post(`${import.meta.env.VITE_APP_API_URL}/api/cards`, {
-                            front: card.front,
-                            back: card.back,
-                            deckId: newDeck._id
-                        })
-                    ));
+                    await axios.post(`${import.meta.env.VITE_APP_API_URL}/api/cards/bulk`, {
+                        cards: cards.map(c => ({ front: c.front, back: c.back })),
+                        deckId: newDeck._id
+                    });
 
                     // Update counts locally since we added cards
                     newDeck.cardCount = cards.length;
