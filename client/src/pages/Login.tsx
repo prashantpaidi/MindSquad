@@ -1,24 +1,26 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
-import { useAuth } from '../context/AuthContext';
+import { useDispatch } from 'react-redux';
+import { setCredentials } from '../store/authSlice';
+import { useLoginMutation } from '../store/apiSlice';
 import { Card, Input, Button, Alert } from '../components/ui';
 
 export default function Login() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const { login } = useAuth();
+    const [login, { isLoading }] = useLoginMutation();
+    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const res = await axios.post(`${import.meta.env.VITE_APP_API_URL}/api/auth/login`, { username, password });
-            login(res.data.token, { userId: res.data.userId, username: res.data.username });
+            const userData = await login({ username, password }).unwrap();
+            dispatch(setCredentials({ user: userData, token: userData.token }));
             navigate('/');
         } catch (err: any) {
-            setError(err.response?.data?.message || 'Login failed');
+            setError(err?.data?.message || 'Login failed');
         }
     };
 
@@ -41,8 +43,8 @@ export default function Login() {
                         onChange={(e) => setPassword(e.target.value)}
                         required
                     />
-                    <Button type="submit" variant="primary" size="lg" fullWidth>
-                        Initialize Session
+                    <Button type="submit" variant="primary" size="lg" fullWidth disabled={isLoading}>
+                        {isLoading ? 'Loading...' : 'Initialize Session'}
                     </Button>
                 </form>
                 <div className="mt-4 text-center text-sm">

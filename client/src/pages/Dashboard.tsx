@@ -1,33 +1,51 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { useAuth } from '../context/AuthContext';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectCurrentUser, logOut } from '../store/authSlice';
 import DeckSelector from '../components/DeckSelector';
 import CreateDeckModal from '../components/CreateDeckModal';
 import ConfirmationModal from '../components/ConfirmationModal';
 import { Deck } from '../types';
+import {
+    useGetDecksQuery,
+    useCreateDeckMutation,
+    useUpdateDeckMutation,
+    useDeleteDeckMutation,
+    useShareDeckMutation,
+    useCreateCardsBulkMutation,
+    useDeleteCardMutation,
+    useUpdateCardMutation,
+    useCreateCardMutation,
+    useLazyGetCardsQuery
+} from '../store/apiSlice';
 
 export default function Dashboard() {
-    const { user, logout } = useAuth();
+    const user = useSelector(selectCurrentUser);
+    const dispatch = useDispatch();
     const navigate = useNavigate();
-    const [decks, setDecks] = useState<Deck[]>([]);
+
+    const logout = () => {
+        dispatch(logOut());
+        navigate('/login');
+    };
+
+    // RTK Query Hooks
+    const { data: decks = [], isLoading: isDecksLoading, error: decksError } = useGetDecksQuery();
+    const [createDeck] = useCreateDeckMutation();
+    const [updateDeck] = useUpdateDeckMutation();
+    const [deleteDeck] = useDeleteDeckMutation();
+    const [shareDeckMutation] = useShareDeckMutation();
+    const [createCardsBulk] = useCreateCardsBulkMutation();
+    const [deleteCard] = useDeleteCardMutation();
+    const [updateCard] = useUpdateCardMutation();
+    const [createCard] = useCreateCardMutation();
+    const [triggerGetCards] = useLazyGetCardsQuery();
+
     const [isCreateDeckModalOpen, setIsCreateDeckModalOpen] = useState(false);
     const [sharingDeck, setSharingDeck] = useState<Deck | null>(null);
-
     const [editingDeckData, setEditingDeckData] = useState<{ _id: string; name: string; description: string; cards: any[] } | null>(null);
 
-    useEffect(() => {
-        fetchDecks();
-    }, []);
 
-    const fetchDecks = async () => {
-        try {
-            const res = await axios.get(`${import.meta.env.VITE_APP_API_URL}/api/decks`);
-            setDecks(res.data);
-        } catch (err) {
-            console.error(err);
-        }
-    };
 
     const handleCreateDeck = async (name: string, description: string, cards: { _id?: string; front: string; back: string }[]) => {
         try {
@@ -36,57 +54,38 @@ export default function Dashboard() {
                 const deckId = editingDeckData._id;
 
                 // 1. Update Deck Details
-                await axios.put(`${import.meta.env.VITE_APP_API_URL}/api/decks/${deckId}`, { name, description });
+                await updateDeck({ id: deckId, name, description }).unwrap();
 
                 // 2. Handle Cards
                 const originalCards = editingDeckData.cards;
                 const submittedCardIds = new Set(cards.filter(c => c._id).map(c => c._id));
 
-                // Identify cards to delete (present in original but not in submitted)
+                // Identify cards to delete
                 const cardsToDelete = originalCards.filter(c => !submittedCardIds.has(c._id));
-                await Promise.all(cardsToDelete.map(c => axios.delete(`${import.meta.env.VITE_APP_API_URL}/api/cards/${c._id}`)));
+                await Promise.all(cardsToDelete.map(c => deleteCard(c._id).unwrap()));
 
                 // Identify cards to update or create
                 await Promise.all(cards.map(card => {
                     if (card._id) {
-                        // Update existing card
-                        return axios.put(`${import.meta.env.VITE_APP_API_URL}/api/cards/${card._id}`, {
-                            front: card.front,
-                            back: card.back
-                        });
+                        return updateCard({ id: card._id, front: card.front, back: card.back }).unwrap();
                     } else {
-                        // Create new card
-                        return axios.post(`${import.meta.env.VITE_APP_API_URL}/api/cards`, {
-                            front: card.front,
-                            back: card.back,
-                            deckId: deckId
-                        });
+                        return createCard({ front: card.front, back: card.back, deckId: deckId }).unwrap();
                     }
                 }));
-
-                // Update local state
-                fetchDecks();
 
                 setEditingDeckData(null);
             } else {
                 // CREATE NEW DECK
                 // 1. Create Deck
-                const deckRes = await axios.post(`${import.meta.env.VITE_APP_API_URL}/api/decks`, { name, description });
-                const newDeck = deckRes.data;
+                const newDeck = await createDeck({ name, description }).unwrap();
 
                 // 2. Create Cards (if any)
                 if (cards.length > 0) {
-                    await axios.post(`${import.meta.env.VITE_APP_API_URL}/api/cards/bulk`, {
+                    await createCardsBulk({
                         cards: cards.map(c => ({ front: c.front, back: c.back })),
                         deckId: newDeck._id
-                    });
-
-                    // Update counts locally since we added cards
-                    newDeck.cardCount = cards.length;
-                    newDeck.dueCount = cards.length;
+                    }).unwrap();
                 }
-
-                setDecks([...decks, newDeck]);
             }
 
             setIsCreateDeckModalOpen(false);
@@ -98,8 +97,7 @@ export default function Dashboard() {
 
     const handleDeleteDeck = async (deckId: string) => {
         try {
-            await axios.delete(`${import.meta.env.VITE_APP_API_URL}/api/decks/${deckId}`);
-            setDecks(decks.filter(d => d._id !== deckId));
+            await deleteDeck(deckId).unwrap();
         } catch (err) {
             console.error(err);
         }
@@ -107,9 +105,8 @@ export default function Dashboard() {
 
     const handleEditDeck = async (deck: Deck) => {
         try {
-            // Fetch cards for this deck
-            const res = await axios.get(`${import.meta.env.VITE_APP_API_URL}/api/cards/${deck._id}`);
-            const cards = res.data;
+            // Fetch cards for this deck using lazy query
+            const cards = await triggerGetCards(deck._id).unwrap();
 
             setEditingDeckData({
                 _id: deck._id,
@@ -141,15 +138,17 @@ export default function Dashboard() {
         if (!sharingDeck) return;
 
         try {
-            const res = await axios.put(`${import.meta.env.VITE_APP_API_URL}/api/decks/${sharingDeck._id}/share`);
-            // Update local state
-            setDecks(decks.map(d => d._id === sharingDeck._id ? { ...d, isPublic: res.data.isPublic } : d));
+            await shareDeckMutation(sharingDeck._id).unwrap();
             setSharingDeck(null);
         } catch (err) {
             console.error(err);
             alert('Failed to update share status.');
         }
     };
+
+    if (isDecksLoading) return <div className="p-8">Loading decks...</div>;
+    // We can handle error state more gracefully, but for now simplistic approach
+    if (decksError) return <div className="p-8 text-red-500">Error loading decks</div>;
 
     return (
         <div>
@@ -192,17 +191,32 @@ export default function Dashboard() {
             </header>
 
             <main className="max-w-screen-xl mx-auto p-8">
-                <DeckSelector
-                    decks={decks}
-                    onSelectDeck={handleStudyDeck}
-                    onCreateDeck={() => {
-                        setEditingDeckData(null);
-                        setIsCreateDeckModalOpen(true);
-                    }}
-                    onDeleteDeck={handleDeleteDeck}
-                    onEditDeck={handleEditDeck}
-                    onShareDeck={handleShareDeckClick}
-                />
+                {decks.length === 0 ? (
+                    <div className="text-center py-10">
+                        <p className="text-xl mb-4">You don't have any decks yet.</p>
+                        <button
+                            onClick={() => {
+                                setEditingDeckData(null);
+                                setIsCreateDeckModalOpen(true);
+                            }}
+                            className="bg-lime-300 px-6 py-3 border-2 border-black shadow-[4px_4px_0px_0px_#000] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_0px_#000] active:translate-y-[4px] active:shadow-none transition-all font-bold"
+                        >
+                            Create Your First Deck
+                        </button>
+                    </div>
+                ) : (
+                    <DeckSelector
+                        decks={decks}
+                        onSelectDeck={handleStudyDeck}
+                        onCreateDeck={() => {
+                            setEditingDeckData(null);
+                            setIsCreateDeckModalOpen(true);
+                        }}
+                        onDeleteDeck={handleDeleteDeck}
+                        onEditDeck={handleEditDeck}
+                        onShareDeck={handleShareDeckClick}
+                    />
+                )}
             </main>
 
             <CreateDeckModal

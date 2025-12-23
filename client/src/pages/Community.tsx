@@ -1,13 +1,20 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useAuth } from '../context/AuthContext';
+import { useDispatch, useSelector } from 'react-redux';
+import { selectCurrentUser, logOut } from '../store/authSlice';
 import DeckCard from '../components/DeckCard';
 import { Deck } from '../types';
 import { useNavigate } from 'react-router-dom';
 
 export default function Community() {
-    const { user, logout } = useAuth();
+    const user = useSelector(selectCurrentUser);
+    const dispatch = useDispatch();
     const navigate = useNavigate();
+
+    const logout = () => {
+        dispatch(logOut());
+        navigate('/login');
+    };
     const [decks, setDecks] = useState<Deck[]>([]);
     const [loading, setLoading] = useState(true);
 

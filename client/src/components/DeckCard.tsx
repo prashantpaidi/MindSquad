@@ -1,6 +1,7 @@
 import { Deck } from '../types';
 import { Pencil, Trash2, Share2, Heart, Copy, User } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import { useSelector } from 'react-redux';
+import { selectCurrentUser } from '../store/authSlice';
 
 interface DeckCardProps {
     deck: Deck;
@@ -23,7 +24,7 @@ export default function DeckCard({
     onLike,
     onFork
 }: DeckCardProps) {
-    const { user } = useAuth();
+    const user = useSelector(selectCurrentUser);
     const isLiked = user ? deck.likes?.includes(user.userId || '') : false;
 
     return (

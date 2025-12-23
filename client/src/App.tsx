@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from './context/AuthContext';
+import { useSelector } from 'react-redux';
+import { selectCurrentToken } from './store/authSlice';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
@@ -7,17 +8,9 @@ import StudyMode from './pages/StudyMode';
 import Community from './pages/Community';
 
 function App() {
-    const { token, loading } = useAuth();
+    const token = useSelector(selectCurrentToken);
 
-    if (loading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="bg-lime-300 border-2 border-black rounded-none shadow-[4px_4px_0px_0px_#000] py-4 px-8 font-[family-name:var(--font-mono)] font-bold uppercase text-black">
-                    Loading...
-                </div>
-            </div>
-        );
-    }
+
 
     return (
         <Router>

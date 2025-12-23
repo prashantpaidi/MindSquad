@@ -1,21 +1,22 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import { useRegisterMutation } from '../store/apiSlice';
 import { Card, Input, Button, Alert } from '../components/ui';
 
 export default function Register() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [register, { isLoading }] = useRegisterMutation();
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            await axios.post(`${import.meta.env.VITE_APP_API_URL}/api/auth/register`, { username, password });
+            await register({ username, password }).unwrap();
             navigate('/login');
         } catch (err: any) {
-            setError(err.response?.data?.message || 'Registration failed');
+            setError(err?.data?.message || 'Registration failed');
         }
     };
 
@@ -38,8 +39,8 @@ export default function Register() {
                         onChange={(e) => setPassword(e.target.value)}
                         required
                     />
-                    <Button type="submit" variant="primary" size="lg" fullWidth>
-                        Create Record
+                    <Button type="submit" variant="primary" size="lg" fullWidth disabled={isLoading}>
+                        {isLoading ? 'Creating...' : 'Create Record'}
                     </Button>
                 </form>
                 <div className="mt-4 text-center text-sm">
